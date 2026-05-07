@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+  <title>ZERO — O Jogo Infinito v2.0</title>
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="zero.css"/>
+</head>
+<body>
+
+<!-- Barra de progresso topo -->
+<div id="topProgressBar" style="width:0%"></div>
+
+<!-- Fundo animado -->
+<canvas id="bgCanvas"></canvas>
+
+<!-- Toast global -->
+<div id="toast"></div>
+
+<!-- Banner de Evento -->
+<div id="eventBanner">
+  <div class="event-title" id="eventTitle">EVENTO!</div>
+  <div class="event-timer" id="eventTimerText">--</div>
+</div>
+
+<!-- MODAL PRESTÍGIO -->
+<div id="prestigeScreen" class="modal-overlay hidden">
+  <div class="modal-box prestige-modal">
+    <div class="modal-title red">⚠ RESET DIMENSIONAL ⚠</div>
+    <p class="modal-body">
+      Você vai reiniciar tudo, mas ganhará <strong id="prestigeBonus">×1.5</strong> multiplicador permanente.
+    </p>
+    <p class="modal-sub">Quanto mais zeros totais, maior o bônus multiplicador.</p>
+    <div class="modal-btns">
+      <button class="modal-btn btn-confirm" id="confirmPrestige">CONFIRMAR PRESTÍGIO</button>
+      <button class="modal-btn btn-cancel" id="cancelPrestige">CANCELAR</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL ESPECIALIZAÇÃO -->
+<div id="specScreen" class="modal-overlay hidden">
+  <div class="modal-box spec-modal">
+    <div class="modal-title purple">⚡ ESCOLHA SUA ESPECIALIZAÇÃO</div>
+    <p class="modal-body">Selecione um caminho que define seu estilo de jogo neste prestígio.</p>
+    <div class="spec-grid">
+      <div class="spec-card speed" id="specSpeed">
+        <div class="spec-icon">⚡</div>
+        <div class="spec-name">SPEED BUILD</div>
+        <div class="spec-desc">+300% poder de clique<br>Combo sobe mais rápido<br>Bônus em cliques rápidos</div>
+      </div>
+      <div class="spec-card idle" id="specIdle">
+        <div class="spec-icon">🏭</div>
+        <div class="spec-name">IDLE BUILD</div>
+        <div class="spec-desc">+200% produção/s<br>Geradores custam menos<br>Produção offline melhorada</div>
+      </div>
+      <div class="spec-card rng" id="specRng">
+        <div class="spec-icon">🎲</div>
+        <div class="spec-name">RNG BUILD</div>
+        <div class="spec-desc">Eventos aleatórios mais fortes<br>Chance de crítico nos cliques<br>Recompensas imprevisíveis</div>
+      </div>
+    </div>
+    <p class="modal-sub">Esta escolha persiste até o próximo prestígio.</p>
+  </div>
+</div>
+
+<!-- MODAL GANHO OFFLINE -->
+<div id="offlineScreen" class="modal-overlay hidden">
+  <div class="modal-box offline-modal">
+    <div class="modal-title gold">⏱ BEM-VINDO DE VOLTA!</div>
+    <p class="modal-body" id="offlineMsg">Você ganhou <strong>0</strong> zeros enquanto estava offline.</p>
+    <p class="modal-sub" id="offlineTime">Ausência: 0 segundos</p>
+    <div class="modal-btns">
+      <button class="modal-btn btn-gold" id="closeOffline">RESGATAR</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL RESET -->
+<div id="resetScreen" class="modal-overlay hidden">
+  <div class="modal-box reset-modal">
+    <div class="modal-title red">⚠ RESET TOTAL</div>
+    <p class="modal-body">Esta ação apagará <strong>todo o progresso</strong> de forma permanente. Isso inclui prestígio, geradores, upgrades e conquistas.</p>
+    <p class="modal-sub">Digite "ZERO" para confirmar:</p>
+    <input id="resetConfirmInput" type="text" placeholder="ZERO"
+      style="background:#0a0a18;border:1px solid var(--border);color:#fff;font-family:var(--font-title);padding:8px 14px;border-radius:4px;margin-top:10px;width:100%;font-size:0.8rem;letter-spacing:3px;text-align:center;outline:none;"/>
+    <div class="modal-btns">
+      <button class="modal-btn btn-confirm" id="confirmReset" disabled>CONFIRMAR RESET</button>
+      <button class="modal-btn btn-cancel" id="cancelReset">CANCELAR</button>
+    </div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+
+  <header>
+    <div class="logo">
+      <span class="zero-glow">0</span>
+      <span class="logo-sub">ZERO — O INFINITO v2.0</span>
+    </div>
+    <div class="header-right">
+      <div class="prestige-info">
+        <span id="prestigeCount">Prestígio: 0</span>
+        <span id="multiplierDisplay">×1.00</span>
+        <span id="specDisplay" style="display:none"></span>
+      </div>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- COLUNA ESQUERDA -->
+    <section class="panel left-panel">
+
+      <h2 class="panel-title">// ESTATÍSTICAS</h2>
+      <div class="stat-row">
+        <span class="stat-label">ZEROS</span>
+        <span class="stat-val" id="zerosDisplay">0</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">POR CLIQUE</span>
+        <span class="stat-val" id="perClickDisplay">1</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">POR SEGUNDO</span>
+        <span class="stat-val" id="perSecDisplay">0</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">TOTAL GANHO</span>
+        <span class="stat-val" id="totalEarnedDisplay">0</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">CLIQUES TOTAIS</span>
+        <span class="stat-val" id="totalClicksDisplay">0</span>
+      </div>
+
+      <div class="divider"></div>
+
+      <h2 class="panel-title">// COMBO</h2>
+      <div class="combo-wrap">
+        <div class="combo-bar-bg" id="comboBg">
+          <div class="combo-bar-fill" id="comboBarFill"></div>
+        </div>
+        <div class="combo-label">
+          <span id="comboCount" class="low">×1</span>
+          <span id="comboTimer">0.0s</span>
+        </div>
+      </div>
+      <p class="combo-hint">Clique rápido para aumentar o combo!</p>
+
+      <div class="divider"></div>
+
+      <h2 class="panel-title">// HABILIDADES</h2>
+      <div class="skills-grid" id="skillsContainer"></div>
+
+      <div class="divider"></div>
+
+      <h2 class="panel-title">// PRESTÍGIO</h2>
+      <p class="prestige-desc">
+        Reset tudo por um multiplicador permanente.<br>
+        Requisito: <span id="prestigeRequirement">1.000.000</span> zeros.
+      </p>
+      <button id="prestigeBtn" class="prestige-trigger" disabled>ATIVAR PRESTÍGIO</button>
+
+    </section>
+
+    <!-- COLUNA CENTRAL -->
+    <section class="panel center-panel">
+
+      <div class="click-area">
+        <button id="mainBtn">
+          <span class="btn-zero">0</span>
+          <span class="btn-ring ring1"></span>
+          <span class="btn-ring ring2"></span>
+          <span class="btn-ring ring3"></span>
+        </button>
+        <div class="click-particles" id="particles"></div>
+      </div>
+
+      <div class="milestone-track">
+        <h3>// PRÓXIMA META</h3>
+        <div class="milestone-bar-bg">
+          <div class="milestone-bar-fill" id="milestoneBar"></div>
+        </div>
+        <div class="milestone-label">
+          <span id="milestoneLabel">Meta: 100</span>
+          <span id="milestonePct">0%</span>
+        </div>
+      </div>
+
+      <div class="best-buy-row">
+        <button class="best-buy-btn" id="autoBuyBtn"
+          data-tip="Compra automaticamente o melhor custo-benefício disponível">
+          🤖 MELHOR COMPRA
+        </button>
+        <button class="best-buy-btn" id="autoBuyToggle"
+          data-tip="Ativa compra automática contínua a cada segundo">
+          🔄 AUTO OFF
+        </button>
+      </div>
+
+      <div class="event-log" id="eventLog">
+        <div class="log-entry">▶ Bem-vindo ao ZERO v2.0. Comece a clicar!</div>
+      </div>
+
+    </section>
+
+    <!-- COLUNA DIREITA -->
+    <section class="panel right-panel">
+      <div class="tabs">
+        <button class="tab active" data-tab="upgrades">UPGRADES</button>
+        <button class="tab" data-tab="generators">GERADORES</button>
+        <button class="tab" data-tab="achievements">CONQUISTAS</button>
+      </div>
+      <div class="tab-content active" id="tab-upgrades">
+        <div id="upgradeList"></div>
+      </div>
+      <div class="tab-content" id="tab-generators">
+        <div id="generatorList"></div>
+      </div>
+      <div class="tab-content" id="tab-achievements">
+        <div id="achievementList"></div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer>
+    <span>ZERO v2.0 — Jogo Infinito ∞</span>
+    <div class="footer-left">
+      <button id="saveBtn">
+        <span class="save-indicator" id="saveIndicator"></span>
+        💾 SALVAR
+      </button>
+      <button id="resetBtn">🗑 APAGAR TUDO</button>
+    </div>
+  </footer>
+
+</div>
+
+<script src="zero.js"></script>
+</body>
+</html>
